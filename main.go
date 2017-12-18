@@ -30,8 +30,10 @@ func main() {
 	port := os.Getenv("PORT")
 
 	if port == "" {
-		port = ":8080"
+		port = "8080"
 	}
+
+	port = ":" + port
 
 	http.Handle("/chat", &templateHandler{filename: "chat.html"})
 
