@@ -22,4 +22,5 @@
 [metadata.heroku]
   root-package = "github.com/manhtai/cusbot"
   go-version = "go1.9"
+  install = ["."]
   ensure = "true"
