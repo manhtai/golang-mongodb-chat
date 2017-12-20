@@ -1,1 +1,71 @@
-Hello!
+<html>
+     <head>
+         <title>Cusbot</title>
+         <meta charset="utf-8">
+
+         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+          <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+     </head>
+     <body>
+          <div class="container">
+
+               <div class="row">
+                    <div class="col">
+                         <h1>Welcome!</h1>
+                         <div class="alert alert-info" role="alert">
+                              Type some thing to start...
+                         </div>
+                    </div>
+               </div>
+
+               <div class="row">
+                    <div class="col" id="messages"></div>
+               </div>
+
+               <br>
+
+               <form id="chatbox">
+                    <div class="form-group">
+                         <input class="form-control" id="body">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send</button>
+               </form>
+          </div>
+
+       <script  src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+       <script>
+         $(function(){
+           var socket = null;
+           var msgBox = $("#body");
+           var messages = $("#messages");
+           $("#chatbox").submit(function(){
+             if (!msgBox.val()) return false;
+             if (!socket) {
+               alert("Error: There is no socket connection.");
+               return false;
+             }
+             socket.send(JSON.stringify({ "Body": msgBox.val() }));
+             msgBox.val("");
+             return false;
+           });
+           if (!window["WebSocket"]) {
+             alert("Error: Your browser does not support web sockets.")
+           } else {
+             socket = new WebSocket("ws://{{.Host}}/room");
+             socket.onclose = function() {
+               console.log("Connection has been closed.");
+             }
+             socket.onmessage = function(e) {
+               var msg = JSON.parse(e.data);
+               messages.append($("<div>").append(
+                    $("<span>").text(msg.Name + ' ').addClass("badge badge-pill badge-primary"),
+                    $("<span>").text(msg.Body)
+               ));
+
+             }
+           }
+         });
+       </script>
+
+     </body>
+</html>

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/manhtai/cusbot/client"
 	"html/template"
 	"log"
 	"net/http"
@@ -34,8 +35,11 @@ func main() {
 	}
 
 	port = ":" + port
+	r := client.NewRoom()
 
 	http.Handle("/chat", &templateHandler{filename: "chat.html"})
+	http.Handle("/room", r)
+	go r.Run()
 
 	log.Println("Starting web server on", port)
 
