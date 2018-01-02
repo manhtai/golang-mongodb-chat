@@ -9,18 +9,19 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/manhtai/cusbot/message"
+	"github.com/manhtai/cusbot/user"
 )
 
-// Client represents a user connect to a room
+// Client represents a user connect to a room, one user may have many devices to chat,
+// so it should not be the same as user
 type Client struct {
-	id int
 	// socket is the web socket for this client.
 	socket *websocket.Conn
 	// send is a channel on which messages are sent.
 	send chan *message.Message
 	// room is the room this client is chatting in.
 	room *Room
-	Name string
+	user *user.User
 }
 
 func (c *Client) read() {
@@ -34,18 +35,19 @@ func (c *Client) read() {
 		msg.When = time.Now()
 
 		// Default nick name to Anonymous
-		if len(c.Name) == 0 {
-			c.Name = "User #" + strconv.Itoa(c.id)
+		if len(c.user.Name) == 0 {
+			c.user.Name = "User #" + strconv.Itoa(c.user.ID)
 		}
 
 		// Allow to change nick name
-		if strings.HasPrefix(msg.Body, "/nick ") && len(msg.Body[6:]) > 0 {
-			c.Name = msg.Body[6:]
-			msg.Name = c.Name
-			msg.Body = "Your nick now is " + c.Name
+		nick := "/nick "
+		if strings.HasPrefix(msg.Body, nick) && len(msg.Body[len(nick):]) > 0 {
+			c.user.Name = msg.Body[len(nick):]
+			msg.Name = c.user.Name
+			msg.Body = "Your nick now is " + c.user.Name
 			c.send <- msg
 		} else {
-			msg.Name = c.Name
+			msg.Name = c.user.Name
 			c.room.forward <- msg
 		}
 	}
@@ -119,11 +121,15 @@ func (r *Room) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	user := &user.User{
+		ID: len(r.clients) + 1,
+	}
+
 	client := &Client{
-		id:     len(r.clients) + 1,
 		socket: socket,
 		send:   make(chan *message.Message, messageBufferSize),
 		room:   r,
+		user:   user,
 	}
 
 	r.join <- client
