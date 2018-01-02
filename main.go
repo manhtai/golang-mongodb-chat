@@ -1,30 +1,19 @@
 package main
 
 import (
-	"github.com/manhtai/cusbot/client"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
-	"sync"
+
+	"github.com/manhtai/cusbot/client"
+	"github.com/manhtai/cusbot/config"
 )
 
-type templateHandler struct {
-	once     sync.Once
-	filename string
-	templ    *template.Template
-}
-
-func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	t.once.Do(func() {
-		t.templ = template.Must(
-			template.ParseFiles(filepath.Join("templates", t.filename)))
-	})
+func chatHandle(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"Host": r.Host,
 	}
-	t.templ.Execute(w, data)
+	config.Templ.ExecuteTemplate(w, "chat.html", data)
 }
 
 func main() {
@@ -37,7 +26,7 @@ func main() {
 	port = ":" + port
 	r := client.NewRoom()
 
-	http.Handle("/chat", &templateHandler{filename: "chat.html"})
+	http.HandleFunc("/chat", chatHandle)
 	http.Handle("/room", r)
 	go r.Run()
 
