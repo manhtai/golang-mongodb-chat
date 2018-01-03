@@ -5,34 +5,33 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/manhtai/cusbot/client"
-	"github.com/manhtai/cusbot/config"
+	"github.com/gorilla/mux"
+	"github.com/manhtai/cusbot/controllers"
+	"github.com/manhtai/cusbot/models"
 )
-
-func chatHandle(w http.ResponseWriter, r *http.Request) {
-	data := map[string]interface{}{
-		"Host": r.Host,
-	}
-	config.Templ.ExecuteTemplate(w, "chat.html", data)
-}
 
 func main() {
 	port := os.Getenv("PORT")
 
 	if port == "" {
-		port = "8080"
+		panic("PORT must be set!")
 	}
-
 	port = ":" + port
-	r := client.NewRoom()
 
-	http.HandleFunc("/chat", chatHandle)
-	http.Handle("/room", r)
+	router := mux.NewRouter()
+	router.HandleFunc("/", controllers.RoomList)
+
+	r := models.NewRoom()
+	router.Handle("/chat", r)
 	go r.Run()
 
-	log.Println("Starting web server on", port)
+	router.HandleFunc("/room/", controllers.RoomList)
+	router.HandleFunc("/room/new", controllers.RoomNew)
+	router.HandleFunc("/room/chat/{id}", controllers.RoomDetail)
 
-	if err := http.ListenAndServe(port, nil); err != nil {
-		log.Fatal("ListenAndServe:", err)
-	}
+	// router.GET("/user/", UserList)
+	// router.GET("/user/:id", UserDetail)
+
+	log.Println("Starting web server on", port)
+	log.Fatal(http.ListenAndServe(port, router))
 }

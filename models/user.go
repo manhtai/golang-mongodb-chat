@@ -1,7 +1,7 @@
-package user
+package models
 
 // User hold information about an user
 type User struct {
-	ID   int
+	Id   int
 	Name string
 }

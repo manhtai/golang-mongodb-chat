@@ -51,7 +51,7 @@
            if (!window["WebSocket"]) {
              alert("Error: Your browser does not support web sockets.")
            } else {
-             socket = new WebSocket("wss://{{.Host}}/room");
+             socket = new WebSocket("wss://{{.Host}}/chat");
              socket.onclose = function() {
                console.log("Connection has been closed.");
              }

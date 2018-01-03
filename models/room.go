@@ -1,73 +1,20 @@
-package client
+package models
 
 import (
 	"log"
 	"net/http"
-	"strconv"
-	"strings"
-	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/manhtai/cusbot/message"
-	"github.com/manhtai/cusbot/user"
+	"gopkg.in/mgo.v2/bson"
 )
-
-// Client represents a user connect to a room, one user may have many devices to chat,
-// so it should not be the same as user
-type Client struct {
-	// socket is the web socket for this client.
-	socket *websocket.Conn
-	// send is a channel on which messages are sent.
-	send chan *message.Message
-	// room is the room this client is chatting in.
-	room *Room
-	user *user.User
-}
-
-func (c *Client) read() {
-	defer c.socket.Close()
-	for {
-		var msg *message.Message
-		err := c.socket.ReadJSON(&msg)
-		if err != nil {
-			return
-		}
-		msg.When = time.Now()
-
-		// Default nick name to Anonymous
-		if len(c.user.Name) == 0 {
-			c.user.Name = "User #" + strconv.Itoa(c.user.ID)
-		}
-
-		// Allow to change nick name
-		nick := "/nick "
-		if strings.HasPrefix(msg.Body, nick) && len(msg.Body[len(nick):]) > 0 {
-			c.user.Name = msg.Body[len(nick):]
-			msg.Name = c.user.Name
-			msg.Body = "Your nick now is " + c.user.Name
-			c.send <- msg
-		} else {
-			msg.Name = c.user.Name
-			c.room.forward <- msg
-		}
-	}
-}
-
-func (c *Client) write() {
-	defer c.socket.Close()
-	for msg := range c.send {
-		err := c.socket.WriteJSON(msg)
-		if err != nil {
-			return
-		}
-	}
-}
 
 // Room represents a room to chat
 type Room struct {
+	Id bson.ObjectId `json:"id" bson:"_id"`
+
 	// forward is a channel that holds incoming messages
 	// that should be forwarded to the other clients.
-	forward chan *message.Message
+	forward chan *Message
 	// join is a channel for clients wishing to join the room.
 	join chan *Client
 	// leave is a channel for clients wishing to leave the room.
@@ -99,7 +46,7 @@ func (r *Room) Run() {
 // NewRoom creates a new room for clients to join
 func NewRoom() *Room {
 	return &Room{
-		forward: make(chan *message.Message),
+		forward: make(chan *Message),
 		join:    make(chan *Client),
 		leave:   make(chan *Client),
 		clients: make(map[*Client]bool),
@@ -121,13 +68,13 @@ func (r *Room) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user := &user.User{
-		ID: len(r.clients) + 1,
+	user := &User{
+		Id: len(r.clients) + 1,
 	}
 
 	client := &Client{
 		socket: socket,
-		send:   make(chan *message.Message, messageBufferSize),
+		send:   make(chan *Message, messageBufferSize),
 		room:   r,
 		user:   user,
 	}
