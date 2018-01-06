@@ -1,7 +1,6 @@
 package models
 
 import (
-	"strconv"
 	"strings"
 	"time"
 
@@ -28,11 +27,11 @@ func (c *Client) read() {
 		if err != nil {
 			return
 		}
-		msg.When = time.Now()
+		msg.Timestamp = time.Now()
 
 		// Default nick name to Anonymous
 		if len(c.user.Name) == 0 {
-			c.user.Name = "User #" + strconv.Itoa(c.user.Id)
+			c.user.Name = "User #" + c.user.ID.Hex()
 		}
 
 		// Allow to change nick name

@@ -1,11 +1,15 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"gopkg.in/mgo.v2/bson"
+)
 
 // User hold information about an user
 type User struct {
-	ID        string    `json:"id" bson:"_id"`
-	Name      string    `json:"name" bson:"name"`
-	CreatedAt time.Time `json:"created_at" bson:"created_at"`
-	Active    bool      `json:"active" bson:"created_at"`
+	ID        bson.ObjectId `json:"id" bson:"_id"`
+	Name      string        `json:"name" bson:"name"`
+	CreatedAt time.Time     `json:"created_at" bson:"created_at"`
+	Active    bool          `json:"active" bson:"created_at"`
 }

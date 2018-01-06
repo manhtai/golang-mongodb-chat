@@ -7,13 +7,13 @@ The app contains 2 parts:
 
 - Persistent structs: User, Channel, Message
 
-These models holds information about User, Channel & Message from channels
-when user send messages, data is saved to Mongodb.
+> These models holds information about User, Channel & Message from channels
+> when user send messages, data is saved to Mongodb.
 
 - Websocket structs: Client, Room
 
-These are responsible for opening Websocket connection to receive message from
-user & broadcast it to all client in a specific channel.
+> These are responsible for opening Websocket connection to receive message from
+> user & broadcast it to all client in a specific channel.
 
 ## Get started
 

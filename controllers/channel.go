@@ -26,7 +26,7 @@ func ChannelNew(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&channel)
 
 	// Add an Id
-	channel.Id = bson.NewObjectId()
+	channel.ID = bson.NewObjectId()
 
 	// Write the user to mongo
 	config.Mgo.DB("cusbot").C("channels").Insert(channel)
