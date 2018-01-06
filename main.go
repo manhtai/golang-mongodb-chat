@@ -26,11 +26,11 @@ func main() {
 	// TODO: Handle login here
 	router.HandleFunc("/", controllers.ChannelList)
 
-	router.HandleFunc("/channel/", controllers.ChannelList)
-	router.HandleFunc("/channel/new/", controllers.ChannelNew)
-	router.HandleFunc("/channel/{id}/chat/", models.RoomChat(r))
-	router.HandleFunc("/channel/{id}/view/", controllers.ChannelView)
-	router.HandleFunc("/channel/{id}/history/", controllers.ChannelHistory)
+	router.HandleFunc("/channel", controllers.ChannelList)
+	router.HandleFunc("/channel/new", controllers.ChannelNew)
+	router.HandleFunc("/channel/{id}/chat", models.RoomChat(r))
+	router.HandleFunc("/channel/{id}/view", controllers.ChannelView)
+	router.HandleFunc("/channel/{id}/history", controllers.ChannelHistory)
 
 	// router.GET("/user/", UserList)
 	// router.GET("/user/:id", UserDetail)

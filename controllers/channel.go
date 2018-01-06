@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -19,22 +19,34 @@ func ChannelList(w http.ResponseWriter, r *http.Request) {
 
 // ChannelNew is used to create new chat channel
 func ChannelNew(w http.ResponseWriter, r *http.Request) {
-	// Stub an user to be populated from the body
-	channel := models.Channel{}
 
-	// Populate the user data
-	json.NewDecoder(r.Body).Decode(&channel)
+	data := map[string]interface{}{}
 
-	// Add an Id
-	channel.ID = bson.NewObjectId()
+	if r.Method == http.MethodPost {
+		// Stub an user to be populated from the body
+		channel := models.Channel{}
 
-	// Write the user to mongo
-	config.Mgo.DB("cusbot").C("channels").Insert(channel)
+		// Populate the user data
+		err := r.ParseForm()
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	// Marshal provided interface into JSON structure
-	rj, _ := json.Marshal(channel)
+		channel.Name = r.FormValue("name")
 
-	config.Templ.ExecuteTemplate(w, "channel-new.html", rj)
+		if channel.Name == "" {
+			channel.Name = "No name"
+		}
+
+		channel.ID = bson.NewObjectId()
+
+		// Write the user to mongo
+		config.Mgo.DB("cusbot").C("channels").Insert(channel)
+
+		data["channel"] = channel
+	}
+
+	config.Templ.ExecuteTemplate(w, "channel-new.html", data)
 }
 
 // ChannelView is where we chat, it displays history along with current chat in the channel

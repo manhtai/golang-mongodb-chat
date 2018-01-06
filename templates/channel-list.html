@@ -1,0 +1,12 @@
+{{template "before_content"}}
+
+<p>List of channels</p>
+<ul>
+     {{range .}}
+          <li><a href="/channel/{{.ID.Hex}}/view">{{.Name}}</a></li>
+     {{end}}
+</ul>
+
+<p><a href="/channel/new">Create new channel</a></p>
+
+{{template "after_content"}}
