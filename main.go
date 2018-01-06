@@ -18,17 +18,17 @@ func main() {
 	}
 	port = ":" + port
 
+	// Start 2 channels to chat & save chat
+	r := models.NewRoomChan()
+	sm := models.NewSaveMessageChan()
+
 	router := mux.NewRouter()
-
-	r := models.NewRoom()
-	go r.Run()
-
 	// TODO: Handle login here
 	router.HandleFunc("/", controllers.Index)
 
 	router.HandleFunc("/channel", controllers.ChannelList)
 	router.HandleFunc("/channel/new", controllers.ChannelNew)
-	router.HandleFunc("/channel/{id}/chat", models.RoomChat(r))
+	router.HandleFunc("/channel/{id}/chat", models.RoomChat(r, sm))
 	router.HandleFunc("/channel/{id}/view", controllers.ChannelView)
 	router.HandleFunc("/channel/{id}/history", controllers.ChannelHistory)
 

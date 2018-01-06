@@ -2,7 +2,6 @@ package models
 
 import (
 	"log"
-	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -19,6 +18,7 @@ type Client struct {
 	room    *Room
 	user    *User
 	channel string
+	save    *chan SaveMessage
 }
 
 func (c *Client) read() {
@@ -37,17 +37,19 @@ func (c *Client) read() {
 			c.user.Name = c.user.ID.Hex()
 		}
 
-		// Allow to change nick name
-		nick := "/nick "
-		if strings.HasPrefix(msg.Body, nick) && len(msg.Body[len(nick):]) > 0 {
-			c.user.Name = msg.Body[len(nick):]
-			msg.Name = c.user.Name
-			msg.Body = "Your nick now is " + c.user.Name
-			c.send <- msg
-		} else {
-			msg.Name = c.user.Name
-			c.room.forward <- msg
+		msg.Name = c.user.Name
+		msg.User = c.user.ID.Hex()
+		msg.Channel = c.channel
+
+		c.room.forward <- msg
+
+		sm := &SaveMessage{
+			channel: c.channel,
+			message: msg,
 		}
+
+		// send message to save in another channel
+		*c.save <- *sm
 	}
 }
 

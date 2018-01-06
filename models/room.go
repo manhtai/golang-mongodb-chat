@@ -22,8 +22,8 @@ type Room struct {
 	clients map[*Client]bool
 }
 
-// Run start a room and run it forever
-func (r *Room) Run() {
+// run start a room and run it forever
+func run(r *Room) {
 	for {
 		select {
 		case client := <-r.join:
@@ -42,14 +42,16 @@ func (r *Room) Run() {
 	}
 }
 
-// NewRoom creates a new room for clients to join
-func NewRoom() *Room {
-	return &Room{
+// NewRoomChan creates a new room for clients to join
+func NewRoomChan() *Room {
+	r := &Room{
 		forward: make(chan *Message),
 		join:    make(chan *Client),
 		leave:   make(chan *Client),
 		clients: make(map[*Client]bool),
 	}
+	go run(r)
+	return r
 }
 
 const (
@@ -62,7 +64,7 @@ var upgrader = &websocket.Upgrader{ReadBufferSize: socketBufferSize,
 
 // RoomChat take a room, return a HandlerFunc,
 // responsible for send & receive websocket data for all channels
-func RoomChat(r *Room) http.HandlerFunc {
+func RoomChat(r *Room, sm *chan SaveMessage) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 
 		vars := mux.Vars(req)
@@ -82,6 +84,7 @@ func RoomChat(r *Room) http.HandlerFunc {
 			room:    r,
 			user:    user,
 			channel: vars["id"],
+			save:    sm,
 		}
 
 		r.join <- client
