@@ -13,7 +13,7 @@ var Mgo *mgo.Session
 func init() {
 	mongoURI := os.Getenv("MONGODB_URI")
 	if mongoURI == "" {
-		mongoURI = "mongodb://localhost"
+		mongoURI = "mongodb://localhost/cusbot"
 	}
 
 	session, err := mgo.Dial(mongoURI)
@@ -23,7 +23,7 @@ func init() {
 	Mgo = session
 
 	// Ensure some Index
-	err = session.DB("cusbot").C("messages").EnsureIndexKey("channel", "timestamp")
+	err = session.DB("").C("messages").EnsureIndexKey("channel", "timestamp")
 	if err != nil {
 		log.Print(err)
 	}

@@ -14,7 +14,7 @@ import (
 // ChannelList lists all the channel available to chat
 func ChannelList(w http.ResponseWriter, r *http.Request) {
 	var data []models.Channel
-	config.Mgo.DB("cusbot").C("channels").Find(nil).All(&data)
+	config.Mgo.DB("").C("channels").Find(nil).All(&data)
 	config.Templ.ExecuteTemplate(w, "channel-list.html", data)
 }
 
@@ -42,7 +42,7 @@ func ChannelNew(w http.ResponseWriter, r *http.Request) {
 		channel.ID = bson.NewObjectId()
 
 		// Write the user to mongo
-		config.Mgo.DB("cusbot").C("channels").Insert(channel)
+		config.Mgo.DB("").C("channels").Insert(channel)
 
 		data["channel"] = channel
 	}
@@ -61,7 +61,7 @@ func ChannelView(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := bson.ObjectIdHex(vars["id"])
 
-	config.Mgo.DB("cusbot").C("channels").FindId(id).One(&channel)
+	config.Mgo.DB("").C("channels").FindId(id).One(&channel)
 	data["channel"] = channel
 
 	config.Templ.ExecuteTemplate(w, "channel-view.html", data)
@@ -73,7 +73,7 @@ func ChannelHistory(w http.ResponseWriter, r *http.Request) {
 	const limit = 100
 	result := make([]models.Message, limit)
 
-	err := config.Mgo.DB("cusbot").C("messages").Find(
+	err := config.Mgo.DB("").C("messages").Find(
 		bson.M{"channel": vars["id"]},
 	).Sort("timestamp").Limit(limit).All(&result)
 

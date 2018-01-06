@@ -31,7 +31,7 @@ func saveMessages(sm *chan SaveMessage) {
 			return
 		}
 
-		err := config.Mgo.DB("cusbot").C("messages").Insert(sM.message)
+		err := config.Mgo.DB("").C("messages").Insert(sM.message)
 		if err != nil {
 			log.Print(err)
 		}
