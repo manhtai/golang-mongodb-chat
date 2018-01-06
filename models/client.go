@@ -1,6 +1,7 @@
 package models
 
 import (
+	"log"
 	"strings"
 	"time"
 
@@ -15,8 +16,9 @@ type Client struct {
 	// send is a channel on which messages are sent.
 	send chan *Message
 	// room is the room this client is chatting in.
-	room *Room
-	user *User
+	room    *Room
+	user    *User
+	channel string
 }
 
 func (c *Client) read() {
@@ -25,13 +27,14 @@ func (c *Client) read() {
 		var msg *Message
 		err := c.socket.ReadJSON(&msg)
 		if err != nil {
+			log.Fatal(err)
 			return
 		}
 		msg.Timestamp = time.Now()
 
 		// Default nick name to Anonymous
 		if len(c.user.Name) == 0 {
-			c.user.Name = "User #" + c.user.ID.Hex()
+			c.user.Name = c.user.ID.Hex()
 		}
 
 		// Allow to change nick name

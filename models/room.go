@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -64,6 +65,8 @@ var upgrader = &websocket.Upgrader{ReadBufferSize: socketBufferSize,
 func RoomChat(r *Room) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 
+		vars := mux.Vars(req)
+
 		socket, err := upgrader.Upgrade(w, req, nil)
 		if err != nil {
 			log.Fatal("ServeHTTP:", err)
@@ -74,10 +77,11 @@ func RoomChat(r *Room) http.HandlerFunc {
 		user.ID = bson.NewObjectId()
 
 		client := &Client{
-			socket: socket,
-			send:   make(chan *Message, messageBufferSize),
-			room:   r,
-			user:   user,
+			socket:  socket,
+			send:    make(chan *Message, messageBufferSize),
+			room:    r,
+			user:    user,
+			channel: vars["id"],
 		}
 
 		r.join <- client
