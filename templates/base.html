@@ -1,26 +1,34 @@
 {{define "before_content"}}
 <!DOCTYPE html>
 <html>
-    <body>
-      <header>
-        <h1>Cusbot</h1>
-        <nav>
-          <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/channel">Channel</a></li>
-          </ul>
-        </nav>
-      </header>
+     <head>
+         <title>Cusbot</title>
+         <meta charset="utf-8">
 
-      <article id="content">
+         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+          <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+     </head>
+     <body>
+          <header>
+               <ul class="nav justify-content-center">
+                 <li class="nav-item">
+                   <a class="nav-link" href="/">Home</a>
+                 </li>
+                 <li class="nav-item">
+                   <a class="nav-link" href="/channel">Channel</a>
+                 </li>
+                 <li class="nav-item">
+                   <a class="nav-link" href="/channel/new">New</a>
+                 </li>
+               </ul>
+          </header>
+          <div class="container">
 {{end}}
 
 {{define "after_content"}}
-      </article>
+           </div>
 
-      <footer>
-        &copy; 2018
-      </footer>
-    </body>
+           <footer class="text-center"> &copy; 2018 </footer>
+     </body>
 </html>
 {{end}}

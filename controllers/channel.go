@@ -54,11 +54,15 @@ func ChannelView(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"Host": r.Host,
 	}
-	vars := mux.Vars(r)
+
 	var channel models.Channel
-	config.Mgo.DB("cusbot").C("channels").FindId(vars["id"]).One(&channel)
+	vars := mux.Vars(r)
+	id := bson.ObjectIdHex(vars["id"])
+
+	config.Mgo.DB("cusbot").C("channels").FindId(id).One(&channel)
 	data["channel"] = channel
-	config.Templ.ExecuteTemplate(w, "channel-detail.html", data)
+
+	config.Templ.ExecuteTemplate(w, "channel-view.html", data)
 }
 
 // ChannelHistory hold chat history in a channel

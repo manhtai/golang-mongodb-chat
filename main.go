@@ -24,7 +24,7 @@ func main() {
 	go r.Run()
 
 	// TODO: Handle login here
-	router.HandleFunc("/", controllers.ChannelList)
+	router.HandleFunc("/", controllers.Index)
 
 	router.HandleFunc("/channel", controllers.ChannelList)
 	router.HandleFunc("/channel/new", controllers.ChannelNew)
