@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -68,9 +69,19 @@ func ChannelView(w http.ResponseWriter, r *http.Request) {
 // ChannelHistory hold chat history in a channel
 func ChannelHistory(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	var channel models.Channel
-	config.Mgo.DB("cusbot").C("channels").FindId(vars["id"]).One(&channel)
+	const limit = 100
+	result := make([]models.Message, limit)
+
+	err := config.Mgo.DB("cusbot").C("messages").Find(
+		bson.M{"channel": vars["id"]},
+	).Sort("timestamp").Limit(limit).All(&result)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rj, _ := json.Marshal(result)
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte("[]"))
+	w.Write(rj)
 }

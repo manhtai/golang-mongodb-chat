@@ -10,15 +10,15 @@ import (
 // Client represents a user connect to a room, one user may have many devices to chat,
 // so it should not be the same as user
 type Client struct {
+	channel string
 	// socket is the web socket for this client.
 	socket *websocket.Conn
 	// send is a channel on which messages are sent.
 	send chan *Message
 	// room is the room this client is chatting in.
-	room    *Room
-	user    *User
-	channel string
-	save    *chan SaveMessage
+	room *Room
+	user *User
+	save *chan SaveMessage
 }
 
 func (c *Client) read() {
