@@ -27,13 +27,13 @@ func saveMessages(sm *chan SaveMessage) {
 	for {
 		sM, ok := <-*sm
 		if !ok {
-			log.Fatal("Error when receiving message to save")
+			log.Print("Error when receiving message to save")
 			return
 		}
 
 		err := config.Mgo.DB("cusbot").C("messages").Insert(sM.message)
 		if err != nil {
-			log.Fatal(err)
+			log.Print(err)
 		}
 	}
 }

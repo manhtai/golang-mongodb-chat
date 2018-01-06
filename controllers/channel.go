@@ -30,7 +30,7 @@ func ChannelNew(w http.ResponseWriter, r *http.Request) {
 		// Populate the user data
 		err := r.ParseForm()
 		if err != nil {
-			log.Fatal(err)
+			log.Print(err)
 		}
 
 		channel.Name = r.FormValue("name")
@@ -78,7 +78,7 @@ func ChannelHistory(w http.ResponseWriter, r *http.Request) {
 	).Sort("timestamp").Limit(limit).All(&result)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 
 	rj, _ := json.Marshal(result)

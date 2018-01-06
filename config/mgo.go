@@ -25,6 +25,6 @@ func init() {
 	// Ensure some Index
 	err = session.DB("cusbot").C("messages").EnsureIndexKey("channel", "timestamp")
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 }

@@ -71,7 +71,7 @@ func RoomChat(r *Room, sm *chan SaveMessage) http.HandlerFunc {
 
 		socket, err := upgrader.Upgrade(w, req, nil)
 		if err != nil {
-			log.Fatal("ServeHTTP:", err)
+			log.Print("ServeHTTP:", err)
 			return
 		}
 

@@ -27,7 +27,7 @@ func (c *Client) read() {
 		var msg *Message
 		err := c.socket.ReadJSON(&msg)
 		if err != nil {
-			log.Fatal(err)
+			log.Print(err)
 			return
 		}
 		msg.Timestamp = time.Now()
