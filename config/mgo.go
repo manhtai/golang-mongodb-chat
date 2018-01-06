@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"os"
 
 	"gopkg.in/mgo.v2"
 )
@@ -10,7 +11,12 @@ import (
 var Mgo *mgo.Session
 
 func init() {
-	session, err := mgo.Dial("mongodb://localhost")
+	mongoURI := os.Getenv("MONGODB_URI")
+	if mongoURI == "" {
+		mongoURI = "mongodb://localhost"
+	}
+
+	session, err := mgo.Dial(mongoURI)
 	if err != nil {
 		panic(err)
 	}
