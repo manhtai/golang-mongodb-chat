@@ -19,15 +19,18 @@ func main() {
 	port = ":" + port
 
 	router := mux.NewRouter()
-	router.HandleFunc("/", controllers.RoomList)
 
 	r := models.NewRoom()
-	router.Handle("/chat", r)
 	go r.Run()
 
-	router.HandleFunc("/room/", controllers.RoomList)
-	router.HandleFunc("/room/new", controllers.RoomNew)
-	router.HandleFunc("/room/chat/{id}", controllers.RoomDetail)
+	// TODO: Handle login here
+	router.HandleFunc("/", controllers.RoomList)
+
+	router.HandleFunc("/channel/", controllers.ChannelList)
+	router.HandleFunc("/channel/new/", controllers.ChannelNew)
+	router.HandleFunc("/channel/{id}/chat/", controllers.ChannelChat(r))
+	router.HandleFunc("/channel/{id}/view/", controllers.ChannelView)
+	router.HandleFunc("/channel/{id}/history/", controllers.ChannelHistory)
 
 	// router.GET("/user/", UserList)
 	// router.GET("/user/:id", UserDetail)

@@ -1,50 +1,46 @@
 package controllers
 
 import (
-	"encoding/json"
+	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
-	"github.com/manhtai/cusbot/config"
+	"github.com/gorilla/websocket"
 	"github.com/manhtai/cusbot/models"
-	"gopkg.in/mgo.v2/bson"
 )
 
-// RoomList lists all the room available
-func RoomList(w http.ResponseWriter, r *http.Request) {
-	var data []models.Room
-	config.Mgo.DB("cusbot").C("rooms").Find(nil).All(&data)
-	config.Templ.ExecuteTemplate(w, "room-list.html", data)
-}
+const (
+	socketBufferSize  = 1024
+	messageBufferSize = 256
+)
 
-// RoomNew is used to create new chat room
-func RoomNew(w http.ResponseWriter, r *http.Request) {
-	// Stub an user to be populated from the body
-	room := models.Room{}
+var upgrader = &websocket.Upgrader{ReadBufferSize: socketBufferSize,
+	WriteBufferSize: socketBufferSize}
 
-	// Populate the user data
-	json.NewDecoder(r.Body).Decode(&room)
+// RoomChat take a room, return a HandlerFunc,
+// responsible for send & receive websocket data for all channels
+func RoomChat(r *models.Room) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
 
-	// Add an Id
-	room.Id = bson.NewObjectId()
+		socket, err := upgrader.Upgrade(w, req, nil)
+		if err != nil {
+			log.Fatal("ServeHTTP:", err)
+			return
+		}
 
-	// Write the user to mongo
-	config.Mgo.DB("cusbot").C("rooms").Insert(room)
+		user := &User{
+			Id: len(r.clients) + 1,
+		}
 
-	// Marshal provided interface into JSON structure
-	rj, _ := json.Marshal(room)
+		client := &Client{
+			socket: socket,
+			send:   make(chan *Message, messageBufferSize),
+			room:   r,
+			user:   user,
+		}
 
-	config.Templ.ExecuteTemplate(w, "room-new.html", rj)
-}
-
-// RoomDetail is where we chat, it holds history of all chat in the room
-func RoomDetail(w http.ResponseWriter, r *http.Request) {
-	data := map[string]interface{}{
-		"Host": r.Host,
+		r.join <- client
+		defer func() { r.leave <- client }()
+		go client.write()
+		client.read()
 	}
-	vars := mux.Vars(r)
-	var room models.Room
-	config.Mgo.DB("cusbot").C("rooms").FindId(vars["id"]).One(&room)
-	data["room"] = room
-	config.Templ.ExecuteTemplate(w, "room-detail.html", data)
 }
