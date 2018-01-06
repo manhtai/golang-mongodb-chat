@@ -50,7 +50,8 @@ func ChannelNew(w http.ResponseWriter, r *http.Request) {
 	config.Templ.ExecuteTemplate(w, "channel-new.html", data)
 }
 
-// ChannelView is where we chat, it displays history along with current chat in the channel
+// ChannelView is where we chat, it displays history along with
+// current chat in the channel
 func ChannelView(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"Host": r.Host,

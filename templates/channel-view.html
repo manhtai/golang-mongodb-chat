@@ -25,10 +25,29 @@
 {{block "javascript" .}}
 <script  src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script>
+
 $(function(){
      var socket = null;
      var msgBox = $("#body");
      var messages = $("#messages");
+
+     function addMessage(messages, msg) {
+          messages.append($("<div>").append(
+               $("<span>").text(msg.name).addClass("badge badge-pill badge-primary"),
+               $("<span>").text(msg.body)
+          ));
+     }
+
+     // Load message history
+     $.ajax({
+          url: "//{{.Host}}/channel/{{.channel.ID.Hex}}/history"
+     }).done(function(data) {
+          data.forEach(function(d) {
+               addMessage(messages, d);
+          })
+     });
+
+     // Send messages to WebSocket
      $("#chatbox").submit(function(){
           if (!msgBox.val()) return false;
           if (!socket) {
@@ -39,6 +58,8 @@ $(function(){
           msgBox.val("");
           return false;
      });
+
+     // Receive messages from WebSocket
      if (!window["WebSocket"]) {
           alert("Error: Your browser does not support web sockets.")
      } else {
@@ -48,10 +69,7 @@ $(function(){
           }
           socket.onmessage = function(e) {
                var msg = JSON.parse(e.data);
-               messages.append($("<div>").append(
-                    $("<span>").text(msg.name).addClass("badge badge-pill badge-primary"),
-                    $("<span>").text(msg.body)
-               ));
+               addMessage(messages, msg);
           }
      }
 });
