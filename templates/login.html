@@ -4,14 +4,10 @@
      <div class="col">
           <div class="card">
                <div class="card-header">
-                    List of channels
+                    Login using
                </div>
                <div class="card-body">
-                    <ul>
-                         {{range .}}
-                              <li><a href="/channel/{{.ID.Hex}}/view">#{{.Name}}</a></li>
-                         {{end}}
-                    </ul>
+                    <a href="/auth/login/gplus" class="btn btn-primary">Google</a>
                </div>
           </div>
      </div>
