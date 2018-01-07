@@ -2,25 +2,48 @@
 
 <div class="row">
      <div class="col">
-          <h1>#{{.channel.Name}}</h1>
-          <div class="alert alert-info" role="alert">
-               Type some thing to start...
+          <div class="card">
+               <div class="card-header">
+                    Welcome to channel #{{.channel.Name}}!
+               </div>
+               <div class="card-body chat-area">
+                    <div id="messages"></div>
+               </div>
+          </div>
+          <div class="card">
+               <div class="card-body chat-footer">
+                    <form id="chatbox">
+                         <div class="input-group form-group">
+                              <input type="text" class="form-control" id="body" autocomplete="off">
+                              <span class="input-group-btn">
+                                   <button class="btn btn-primary" type="submit">Send</button>
+                              </span>
+                         </div>
+                    </form>
+               </div>
           </div>
      </div>
 </div>
 
-<div class="row">
-     <div class="col" id="messages"></div>
-</div>
+{{block "css" .}}
+<style type="text/css">
+.chat-area {
+     overflow-y: auto;
+     height: 60vh;
+     margin-bottom: 70px;
+}
 
-<br>
+.chat-footer {
+     position: absolute;
+     bottom: 0;
+     width: 100%;
+}
 
-<form id="chatbox">
-     <div class="form-group">
-          <input class="form-control" id="body" autocomplete="off">
-     </div>
-     <button type="submit" class="btn btn-primary">Send</button>
-</form>
+.message-bubble:nth-child(even) {
+     background-color: #F5F5F5;
+}
+</style>
+{{end}}
 
 {{block "javascript" .}}
 <script  src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
@@ -31,11 +54,26 @@ $(function(){
      var msgBox = $("#body");
      var messages = $("#messages");
 
-     function addMessage(messages, msg) {
-          messages.append($("<div>").append(
-               $("<span>").text(msg.name).addClass("badge badge-pill badge-primary"),
-               $("<span>").text(msg.body)
-          ));
+     function scrollToBottom() {
+          var height = 0;
+          $('.message-bubble').each(function(i, value){
+              height += parseInt($(this).height()) + 50;
+          });
+          $(".chat-area").animate({ scrollTop: height }, 70);
+     }
+
+     function addMessage(messages, msg, order) {
+          var message = $("<div>").addClass("card-body message-bubble").append(
+               $("<p>").text(msg.name).addClass("card-title text-muted"),
+               $("<p>").text(msg.body).addClass("card-text")
+          );
+          if (order === 1) {
+               messages.append(message);
+          } else {
+               messages.prepend(message);
+          }
+
+          scrollToBottom();
      }
 
      // Load message history
@@ -43,7 +81,7 @@ $(function(){
           url: "//{{.Host}}/channel/{{.channel.ID.Hex}}/history"
      }).done(function(data) {
           data.forEach(function(d) {
-               addMessage(messages, d);
+               addMessage(messages, d, -1);
           })
      });
 
@@ -69,7 +107,7 @@ $(function(){
           }
           socket.onmessage = function(e) {
                var msg = JSON.parse(e.data);
-               addMessage(messages, msg);
+               addMessage(messages, msg, 1);
           }
      }
 });

@@ -70,12 +70,12 @@ func ChannelView(w http.ResponseWriter, r *http.Request) {
 // ChannelHistory hold chat history in a channel
 func ChannelHistory(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	const limit = 100
+	const limit = 10
 	result := make([]models.Message, limit)
 
 	err := config.Mgo.DB("").C("messages").Find(
 		bson.M{"channel": vars["id"]},
-	).Sort("timestamp").Limit(limit).All(&result)
+	).Sort("-timestamp").Limit(limit).All(&result)
 
 	if err != nil {
 		log.Print(err)
