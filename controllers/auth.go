@@ -105,18 +105,15 @@ func MustAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		session, err := config.Store.Get(r, "session")
-		val := session.Values["user"]
+		if err != nil {
+			fmt.Println(err)
+		}
 
+		val := session.Values["user"]
 		if _, ok := val.(*models.User); !ok {
 			// not authenticated
 			w.Header().Set("Location", "/auth/login")
 			w.WriteHeader(http.StatusTemporaryRedirect)
-			return
-		}
-
-		if err != nil {
-			// some other error
-			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -130,18 +127,15 @@ func MustNotAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		session, err := config.Store.Get(r, "session")
-		val := session.Values["user"]
+		if err != nil {
+			fmt.Println(err)
+		}
 
+		val := session.Values["user"]
 		if _, ok := val.(*models.User); ok {
 			// already authenticated
 			w.Header().Set("Location", "/")
 			w.WriteHeader(http.StatusTemporaryRedirect)
-			return
-		}
-
-		if err != nil {
-			// some other error
-			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
