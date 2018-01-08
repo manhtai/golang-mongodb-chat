@@ -18,8 +18,7 @@ func ChannelList(w http.ResponseWriter, r *http.Request) {
 	config.Templ.ExecuteTemplate(w, "channel-list.html", data)
 }
 
-// ChannelNew is used to create new chat channel
-func ChannelNew(w http.ResponseWriter, r *http.Request) {
+func channelNew(w http.ResponseWriter, r *http.Request) {
 
 	data := map[string]interface{}{}
 
@@ -50,9 +49,7 @@ func ChannelNew(w http.ResponseWriter, r *http.Request) {
 	config.Templ.ExecuteTemplate(w, "channel-new.html", data)
 }
 
-// ChannelView is where we chat, it displays history along with
-// current chat in the channel
-func ChannelView(w http.ResponseWriter, r *http.Request) {
+func channelView(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"Host": r.Host,
 	}
@@ -67,8 +64,7 @@ func ChannelView(w http.ResponseWriter, r *http.Request) {
 	config.Templ.ExecuteTemplate(w, "channel-view.html", data)
 }
 
-// ChannelHistory hold chat history in a channel
-func ChannelHistory(w http.ResponseWriter, r *http.Request) {
+func channelHistory(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	const limit = 10
 	result := make([]models.Message, limit)
@@ -86,3 +82,13 @@ func ChannelHistory(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(rj)
 }
+
+// ChannelNew is used to create new chat channel
+var ChannelNew = MustAuth(channelNew)
+
+// ChannelHistory hold chat history in a channel
+var ChannelHistory = MustAuth(channelHistory)
+
+// ChannelView is where we chat, it displays history along with
+// current chat in the channel
+var ChannelView = MustAuth(channelView)

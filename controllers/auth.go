@@ -19,39 +19,11 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	config.Templ.ExecuteTemplate(w, "index.html", nil)
 }
 
-// Login servers our login page
-func Login(w http.ResponseWriter, r *http.Request) {
+func login(w http.ResponseWriter, r *http.Request) {
 	config.Templ.ExecuteTemplate(w, "login.html", nil)
 }
 
-// MustAuth is a login required decorator for HandlerFunc
-func MustAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-
-		session, err := config.Store.Get(r, "session")
-
-		val := session.Values["user"]
-
-		if _, ok := val.(*models.User); !ok {
-			// not authenticated
-			w.Header().Set("Location", "/auth/login")
-			w.WriteHeader(http.StatusTemporaryRedirect)
-			return
-		}
-
-		if err != nil {
-			// some other error
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		// success - call the original handler
-		handlerFunc(w, r)
-	}
-}
-
-// LoginHandle redirect user to providers' login page & receive callback from them
-func LoginHandle(w http.ResponseWriter, r *http.Request) {
+func loginHandle(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	action := vars["action"]
@@ -120,11 +92,69 @@ func LoginHandle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Logout uses to log User out
-func Logout(w http.ResponseWriter, r *http.Request) {
+func logout(w http.ResponseWriter, r *http.Request) {
 	session, _ := config.Store.Get(r, "session")
 	session.Options.MaxAge = -1
 	session.Save(r, w)
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
+
+// MustAuth is a login required decorator for HandlerFunc
+func MustAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		session, err := config.Store.Get(r, "session")
+		val := session.Values["user"]
+
+		if _, ok := val.(*models.User); !ok {
+			// not authenticated
+			w.Header().Set("Location", "/auth/login")
+			w.WriteHeader(http.StatusTemporaryRedirect)
+			return
+		}
+
+		if err != nil {
+			// some other error
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// success - call the original handler
+		handlerFunc(w, r)
+	}
+}
+
+// MustNotAuth is a anonymous required decorator for HandlerFunc
+func MustNotAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		session, err := config.Store.Get(r, "session")
+		val := session.Values["user"]
+
+		if _, ok := val.(*models.User); ok {
+			// already authenticated
+			w.Header().Set("Location", "/")
+			w.WriteHeader(http.StatusTemporaryRedirect)
+			return
+		}
+
+		if err != nil {
+			// some other error
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// success - call the original handler
+		handlerFunc(w, r)
+	}
+}
+
+// Logout uses to log User out
+var Logout = MustAuth(logout)
+
+// LoginHandle redirect user to providers' login page & receive callback from them
+var LoginHandle = MustNotAuth(loginHandle)
+
+// Login servers our login page
+var Login = MustNotAuth(login)
