@@ -62,9 +62,21 @@ $(function(){
           $(".chat-area").animate({ scrollTop: height }, 70);
      }
 
+     function timePad(t) {
+          return String(t).padStart(2).replace(" ", 0);
+     }
+
+     function formatDate(da) {
+          var d = new Date(da);
+          return timePad(d.getDate())+"/"+timePad(d.getMonth()+1)+"/"+d.getFullYear() +
+               " "+timePad(d.getHours())+":"+timePad(d.getMinutes())+":"+timePad(d.getSeconds());
+     }
+
      function addMessage(messages, msg, order) {
           var message = $("<div>").addClass("card-body message-bubble").append(
-               $("<p>").text(msg.name).addClass("card-title text-muted"),
+               $("<h6>").text(msg.name + " ").addClass("card-title text-muted").append(
+                    $("<small>").text(formatDate(msg.timestamp)).addClass("text-muted"),
+               ),
                $("<p>").text(msg.body).addClass("card-text")
           );
           if (order === 1) {
