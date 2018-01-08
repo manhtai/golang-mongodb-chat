@@ -34,10 +34,13 @@ func main() {
 
 	// Chat handlers
 	router.HandleFunc("/channel", controllers.ChannelList)
-	router.HandleFunc("/channel/new", controllers.ChannelNew)
+	router.HandleFunc("/channel/new",
+		controllers.MustAuth(controllers.ChannelNew))
 	router.HandleFunc("/channel/{id}/chat", models.RoomChat(r, sm))
-	router.HandleFunc("/channel/{id}/view", controllers.ChannelView)
-	router.HandleFunc("/channel/{id}/history", controllers.ChannelHistory)
+	router.HandleFunc("/channel/{id}/view",
+		controllers.MustAuth(controllers.ChannelView))
+	router.HandleFunc("/channel/{id}/history",
+		controllers.MustAuth(controllers.ChannelHistory))
 
 	// User handlers
 	// router.GET("/user/", UserList)

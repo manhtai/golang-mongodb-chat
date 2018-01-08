@@ -6,7 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"gopkg.in/mgo.v2/bson"
+	"github.com/manhtai/cusbot/config"
 )
 
 // Room represents a room to chat
@@ -75,8 +75,15 @@ func RoomChat(r *Room, sm *chan SaveMessage) http.HandlerFunc {
 			return
 		}
 
-		user := &User{}
-		user.ID = bson.NewObjectId()
+		// Get user out of session
+		session, _ := config.Store.Get(req, "session")
+		val := session.Values["user"]
+		var user = &User{}
+		var ok bool
+		if user, ok = val.(*User); !ok {
+			log.Print("Invalid session")
+			return
+		}
 
 		client := &Client{
 			socket:  socket,

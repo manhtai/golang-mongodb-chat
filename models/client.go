@@ -31,14 +31,7 @@ func (c *Client) read() {
 			return
 		}
 		msg.Timestamp = time.Now()
-
-		// Default nick name to Anonymous
-		if len(c.user.Name) == 0 {
-			c.user.Name = c.user.ID.Hex()
-		}
-
 		msg.Name = c.user.Name
-		msg.User = c.user.ID.Hex()
 		msg.Channel = c.channel
 
 		c.room.forward <- msg

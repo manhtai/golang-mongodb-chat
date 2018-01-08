@@ -10,10 +10,13 @@ import (
 	"github.com/markbates/goth/providers/gplus"
 )
 
+// Store keep our sessions
+var Store *sessions.FilesystemStore
+
 func init() {
-	store := sessions.NewFilesystemStore(os.TempDir(), []byte("cusbot"))
-	store.MaxLength(math.MaxInt64)
-	gothic.Store = store
+	Store = sessions.NewFilesystemStore(os.TempDir(), []byte(os.Getenv("SECRET_KEY")))
+	Store.MaxLength(math.MaxInt64)
+	gothic.Store = Store
 }
 
 var providers = make(map[string]*gplus.Provider)
@@ -28,9 +31,9 @@ func CreateProvider(redirectURI string) {
 			os.Getenv("GPLUS_SECRET"),
 			redirectURI,
 		)
-	}
 
-	goth.UseProviders(
-		providers[redirectURI],
-	)
+		goth.UseProviders(
+			providers[redirectURI],
+		)
+	}
 }

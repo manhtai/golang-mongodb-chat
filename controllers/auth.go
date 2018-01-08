@@ -1,10 +1,13 @@
 package controllers
 
 import (
+	"time"
+
 	"github.com/gorilla/mux"
 	"github.com/manhtai/cusbot/config"
+	"github.com/manhtai/cusbot/models"
+	"gopkg.in/mgo.v2/bson"
 
-	"encoding/base64"
 	"fmt"
 	"net/http"
 
@@ -21,30 +24,30 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	config.Templ.ExecuteTemplate(w, "login.html", nil)
 }
 
-type authHandler struct {
-	next http.Handler
-}
+// MustAuth is a login required decorator for HandlerFunc
+func MustAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 
-func (h *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	_, err := r.Cookie("name")
-	if err == http.ErrNoCookie {
-		// not authenticated
-		w.Header().Set("Location", "/auth/login")
-		w.WriteHeader(http.StatusTemporaryRedirect)
-		return
-	}
-	if err != nil {
-		// some other error
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	// success - call the next handler
-	h.next.ServeHTTP(w, r)
-}
+		session, err := config.Store.Get(r, "session")
 
-// MustAuth is a decorator for login required url
-func MustAuth(handler http.Handler) http.Handler {
-	return &authHandler{next: handler}
+		val := session.Values["user"]
+
+		if _, ok := val.(*models.User); !ok {
+			// not authenticated
+			w.Header().Set("Location", "/auth/login")
+			w.WriteHeader(http.StatusTemporaryRedirect)
+			return
+		}
+
+		if err != nil {
+			// some other error
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// success - call the original handler
+		handlerFunc(w, r)
+	}
 }
 
 // LoginHandle redirect user to providers' login page & receive callback from them
@@ -66,19 +69,48 @@ func LoginHandle(w http.ResponseWriter, r *http.Request) {
 		gothic.BeginAuthHandler(w, r)
 
 	case "callback":
-		user, err := gothic.CompleteUserAuth(w, r)
+		gothUser, err := gothic.CompleteUserAuth(w, r)
 		if err != nil {
 			fmt.Fprintln(w, err)
 			return
 		}
-		userName := base64.StdEncoding.EncodeToString([]byte(user.Name))
-		http.SetCookie(
-			w,
-			&http.Cookie{
-				Name:  "name",
-				Value: userName,
-				Path:  "/",
-			})
+
+		var user = &models.User{}
+		var ID = gothUser.Provider + gothUser.UserID
+
+		config.Mgo.DB("").C("users").Find(
+			bson.M{"ID": ID},
+		).One(&user)
+
+		if user.ID == "" {
+			// FIXME: Can you do better?
+			user.ID = ID
+			user.UserID = gothUser.UserID
+			user.Provider = gothUser.Provider
+			user.Active = true
+			user.CreatedAt = time.Now()
+		}
+
+		user.Email = gothUser.Email
+		user.Name = gothUser.Name
+		user.FirstName = gothUser.FirstName
+		user.LastName = gothUser.LastName
+		user.NickName = gothUser.NickName
+		user.Description = gothUser.Description
+		user.AvatarURL = gothUser.AvatarURL
+		user.Location = gothUser.Location
+		user.AccessToken = gothUser.AccessToken
+		user.AccessTokenSecret = gothUser.AccessTokenSecret
+		user.RefreshToken = gothUser.RefreshToken
+		user.ExpiresAt = gothUser.ExpiresAt
+
+		// Update or insert new user
+		config.Mgo.DB("").C("users").UpsertId(ID, user)
+
+		session, _ := config.Store.Get(r, "session")
+		session.Values["user"] = user
+		session.Save(r, w)
+
 		w.Header().Set("Location", "/channel")
 		w.WriteHeader(http.StatusTemporaryRedirect)
 
@@ -90,6 +122,9 @@ func LoginHandle(w http.ResponseWriter, r *http.Request) {
 
 // Logout uses to log User out
 func Logout(w http.ResponseWriter, r *http.Request) {
-	// TODO: Log user out
+	session, _ := config.Store.Get(r, "session")
+	session.Options.MaxAge = -1
+	session.Save(r, w)
+
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
