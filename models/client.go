@@ -30,14 +30,15 @@ func (c *Client) read() {
 			log.Print(err)
 			return
 		}
-		msg.Timestamp = time.Now()
+
 		msg.Name = c.user.Name
 		msg.Channel = c.channel
+		msg.User = c.user.ID
+		msg.Timestamp = time.Now()
 
 		c.room.forward <- msg
 
 		sm := &SaveMessage{
-			channel: c.channel,
 			message: msg,
 		}
 

@@ -19,7 +19,6 @@ type Message struct {
 
 // SaveMessage uses to save Message to db
 type SaveMessage struct {
-	channel string
 	message *Message
 }
 
