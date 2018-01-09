@@ -6,7 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"github.com/manhtai/cusbot/config"
+	"github.com/manhtai/golang-mongodb-chat/config"
 )
 
 // Room represents a room to chat

@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
-	"github.com/manhtai/cusbot/controllers"
-	"github.com/manhtai/cusbot/models"
+	"github.com/manhtai/golang-mongodb-chat/controllers"
+	"github.com/manhtai/golang-mongodb-chat/models"
 )
 
 func main() {

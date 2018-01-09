@@ -1,1 +1,1 @@
-web: cusbot
+web: golang-mongodb-chat

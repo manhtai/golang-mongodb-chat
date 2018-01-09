@@ -13,7 +13,7 @@ var Mgo *mgo.Session
 func init() {
 	mongoURI := os.Getenv("MONGODB_URI")
 	if mongoURI == "" {
-		mongoURI = "mongodb://localhost/cusbot"
+		mongoURI = "mongodb://localhost/chat"
 	}
 
 	session, err := mgo.Dial(mongoURI)

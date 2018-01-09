@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/manhtai/cusbot/config"
-	"github.com/manhtai/cusbot/models"
+	"github.com/manhtai/golang-mongodb-chat/config"
+	"github.com/manhtai/golang-mongodb-chat/models"
 	"gopkg.in/mgo.v2/bson"
 
 	"fmt"

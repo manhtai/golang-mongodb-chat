@@ -3,7 +3,7 @@ A toy chat app
 
 ## Demo
 
-https://cusbot.herokuapp.com/
+https://golang-mongodb-chat.herokuapp.com/
 
 ## Overview
 
@@ -22,7 +22,7 @@ The app contains 2 parts:
 ## Get started
 
 ```sh
-go get github.com/manhtai/cusbot
+go get github.com/manhtai/golang-mongodb-chat
 dep ensure
 go run main.go
 ```
