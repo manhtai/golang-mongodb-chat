@@ -9,6 +9,9 @@ func init() {
 	gob.Register(&User{})
 }
 
+// UserKey is key to save user to context
+type UserKey int
+
 // User hold information about an user
 type User struct {
 	ID                string    `json:"id" bson:"_id"`

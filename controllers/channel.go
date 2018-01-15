@@ -22,7 +22,9 @@ func channelNew(w http.ResponseWriter, r *http.Request) {
 
 	data := map[string]interface{}{}
 
-	if r.Method == http.MethodPost {
+	user, ok := r.Context().Value(models.UserKey(0)).(*models.User)
+
+	if r.Method == http.MethodPost && ok {
 		// Stub an user to be populated from the body
 		channel := models.Channel{}
 
@@ -32,13 +34,13 @@ func channelNew(w http.ResponseWriter, r *http.Request) {
 			log.Print(err)
 		}
 
+		channel.CreatedBy = user.ID
+		channel.ID = bson.NewObjectId()
 		channel.Name = r.FormValue("name")
 
 		if channel.Name == "" {
 			channel.Name = "No name"
 		}
-
-		channel.ID = bson.NewObjectId()
 
 		// Write the user to mongo
 		config.Mgo.DB("").C("channels").Insert(channel)

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -103,22 +104,26 @@ func logout(w http.ResponseWriter, r *http.Request) {
 // MustAuth is a login required decorator for HandlerFunc
 func MustAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		session, err := config.Store.Get(r, "session")
 		if err != nil {
 			fmt.Println(err)
 		}
 
 		val := session.Values["user"]
-		if _, ok := val.(*models.User); !ok {
+		user, ok := val.(*models.User)
+
+		if !ok {
 			// not authenticated
 			w.Header().Set("Location", "/auth/login")
 			w.WriteHeader(http.StatusTemporaryRedirect)
 			return
 		}
 
+		ctx := r.Context()
+		ctx = context.WithValue(ctx, models.UserKey(0), user)
+
 		// success - call the original handler
-		handlerFunc(w, r)
+		handlerFunc(w, r.WithContext(ctx))
 	}
 }
 
