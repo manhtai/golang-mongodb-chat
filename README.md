@@ -1,10 +1,6 @@
 A toy chat app
 ==============
 
-## Demo
-
-https://golang-mongodb-chat.herokuapp.com/
-
 ## Overview
 
 The app contains 2 parts:
